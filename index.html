@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>ImmoReel Studio</title>
+  <meta name="description" content="Aus Objektdaten und Fotos automatisch ein fertiges Makler-Reel — installierbar als App." />
+  <meta name="theme-color" content="#16181D" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#ECEDEF" media="(prefers-color-scheme: light)" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="ImmoReel" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="appbar">
+    <div class="brand">
+      <div class="brand-mark">iR</div>
+      <div>
+        <div class="brand-name">Immo<span>Reel</span> Studio</div>
+        <div class="brand-sub">Objektdaten &amp; Fotos rein &rarr; fertiges Reel raus</div>
+      </div>
+    </div>
+    <div class="appbar-spacer"></div>
+    <button class="ghost-btn accent" id="installBtn" type="button" hidden>App installieren</button>
+    <button class="ghost-btn" id="themeBtn" type="button">Theme</button>
+  </header>
+
+  <main class="workspace">
+    <!-- VORSCHAU -->
+    <section class="preview">
+      <div class="card">
+        <div class="preview-head">
+          <h2>Vorschau</h2>
+          <span class="live-tag">Live &middot; baut sich aus deinen Daten</span>
+        </div>
+
+        <div class="stage">
+          <div class="canvas-wrap">
+            <canvas id="reel" width="720" height="1280" aria-label="Video-Vorschau des Objekt-Reels"></canvas>
+          </div>
+        </div>
+
+        <div class="controls">
+          <div class="transport">
+            <button class="play" id="playBtn" type="button" aria-label="Abspielen oder Pause">
+              <svg id="playIcon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2.5v11l9-5.5z"/></svg>
+            </button>
+            <div class="scrub" id="scrub" role="slider" aria-label="Zeitleiste" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <div class="scrub-track"><div class="scrub-fill" id="scrubFill"></div></div>
+            </div>
+            <div class="time"><span id="tCur">0:00</span> / <span id="tTot">0:00</span></div>
+          </div>
+
+          <div class="switch-row">
+            <span class="switch-label">Stil</span>
+            <div class="pills" id="stylePills">
+              <button class="pill" type="button" data-style="modern" aria-pressed="false">Modern <small>kühl · klar</small></button>
+              <button class="pill" type="button" data-style="luxus" aria-pressed="true">Luxus <small>schwarz · gold</small></button>
+              <button class="pill" type="button" data-style="minimal" aria-pressed="false">Minimal <small>weiß · ruhig</small></button>
+            </div>
+          </div>
+
+          <div class="switch-row">
+            <span class="switch-label">Format</span>
+            <div class="pills" id="formatPills">
+              <button class="pill" type="button" data-format="9:16" aria-pressed="true">Reel <small>9:16</small></button>
+              <button class="pill" type="button" data-format="1:1" aria-pressed="false">Feed <small>1:1</small></button>
+              <button class="pill" type="button" data-format="16:9" aria-pressed="false">YouTube <small>16:9</small></button>
+            </div>
+          </div>
+
+          <div class="render-row">
+            <div class="render-actions">
+              <button class="btn-render" id="renderBtn" type="button">
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1l1.9 4.2L14.5 6l-3.4 3.1.9 4.6L8 11.6 4 13.7l.9-4.6L1.5 6l4.6-.8z"/></svg>
+                Video generieren
+              </button>
+              <a class="dl-link" id="dlLink" hidden download>
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M7 1h2v7l2.5-2.5 1.4 1.4L8 12 3.1 6.9l1.4-1.4L7 8zM3 13h10v2H3z"/></svg>
+                Herunterladen
+              </a>
+            </div>
+            <div class="progress-bar" id="progWrap" hidden><i id="progFill"></i></div>
+            <div class="render-status" id="renderStatus">Ausgabe: <span class="mono">MP4/WebM &middot; Musik &amp; Untertitel automatisch</span>. Das Video wird echt in deinem Browser gerendert.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FORMULAR -->
+    <aside class="form">
+      <div class="card">
+        <div>
+          <h2>Objekt anlegen</h2>
+          <p class="form-intro">Tippe die Daten ein &mdash; die Vorschau baut sich sofort neu. Kein Schnitt, kein Editor.</p>
+        </div>
+
+        <fieldset>
+          <div class="legend">Objektdaten</div>
+          <div class="field">
+            <label for="fTitle">Titel</label>
+            <input id="fTitle" type="text" value="Lichtdurchflutete Altbauwohnung" autocomplete="off" />
+          </div>
+          <div class="grid-2">
+            <div class="field">
+              <label for="fLocation">Ort / Lage</label>
+              <input id="fLocation" type="text" value="Kassel-Vorderer Westen" autocomplete="off" />
+            </div>
+            <div class="field">
+              <label for="fPrice">Kaufpreis (€)</label>
+              <input id="fPrice" type="text" inputmode="numeric" value="449000" autocomplete="off" />
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="field">
+              <label for="fRooms">Zimmer</label>
+              <input id="fRooms" type="text" value="3,5" autocomplete="off" />
+            </div>
+            <div class="field">
+              <label for="fArea">Wohnfläche (m²)</label>
+              <input id="fArea" type="text" inputmode="numeric" value="96" autocomplete="off" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="fHighlights">Highlights (mit Komma trennen)</label>
+            <input id="fHighlights" type="text" value="Saniert 2024, Einbauküche, Stellplatz" autocomplete="off" />
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <div class="legend">Fotos</div>
+          <div class="upload-row">
+            <label class="upload-btn" for="photoInput">
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M2 3h3l1-1.5h4L11 3h3v10H2zm6 2.5A3.5 3.5 0 1 0 8 12a3.5 3.5 0 0 0 0-6.5z"/></svg>
+              Fotos wählen
+            </label>
+            <input id="photoInput" type="file" accept="image/*" multiple hidden />
+            <span class="upload-hint">bis zu 4 Fotos &middot; sonst Beispiel-Flächen</span>
+          </div>
+          <div class="thumbs" id="thumbs"></div>
+        </fieldset>
+
+        <fieldset>
+          <div class="legend">Musik (optional)</div>
+          <div class="upload-row">
+            <label class="upload-btn" for="audioInput">
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M6 2l7-1v9.2A2.5 2.5 0 1 0 14 12V4L8 5v6.7A2.5 2.5 0 1 0 9 13V2z"/></svg>
+              Musik wählen
+            </label>
+            <input id="audioInput" type="file" accept="audio/*" hidden />
+            <span class="upload-hint" id="audioHint">keine — Video wird ohne Ton exportiert</span>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <div class="legend">Makler / Branding</div>
+          <div class="grid-2">
+            <div class="field">
+              <label for="fAgent">Name / Büro</label>
+              <input id="fAgent" type="text" value="Makler Müller Immobilien" autocomplete="off" />
+            </div>
+            <div class="field">
+              <label for="fPhone">Telefon</label>
+              <input id="fPhone" type="text" value="0561 – 123 456" autocomplete="off" />
+            </div>
+          </div>
+        </fieldset>
+      </div>
+    </aside>
+  </main>
+
+  <p class="footnote">
+    Alle Beispiel-Fotos sind Platzhalter-Flächen. Das Video wird vollständig lokal in deinem Browser gerendert
+    (<b>Canvas + MediaRecorder</b>) &mdash; kein Upload, keine Cloud. Als App installierbar &amp; offline nutzbar.
+  </p>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="reel.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
