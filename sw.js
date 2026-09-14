@@ -1,5 +1,5 @@
 /* ImmoReel Service Worker — App-Shell offline verfügbar machen */
-var CACHE = "immoreel-v4";
+var CACHE = "immoreel-v5";
 var CORE = [
   "./",
   "index.html",

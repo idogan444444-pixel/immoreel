@@ -10,20 +10,14 @@
       <stop offset="1" stop-color="#B07E2A"/>
     </linearGradient>
     <radialGradient id="ir-glow" cx="0.3" cy="0.18" r="0.85">
-      <stop offset="0" stop-color="#F4D089" stop-opacity="0.28"/>
+      <stop offset="0" stop-color="#F4D089" stop-opacity="0.26"/>
       <stop offset="0.55" stop-color="#F4D089" stop-opacity="0"/>
     </radialGradient>
-    <mask id="ir-house">
-      <rect width="100" height="100" fill="#000"/>
-      <path d="M50 19 L80.5 47 L80.5 81 L19.5 81 L19.5 47 Z"
-            fill="#fff" stroke="#fff" stroke-width="5" stroke-linejoin="round"/>
-      <path d="M42 55 L42 73 L61 64 Z"
-            fill="#000" stroke="#000" stroke-width="2.5" stroke-linejoin="round"/>
-    </mask>
   </defs>
   <rect x="3" y="3" width="94" height="94" rx="23" fill="url(#ir-tile)"/>
   <rect x="3" y="3" width="94" height="94" rx="23" fill="url(#ir-glow)"/>
-  <rect width="100" height="100" fill="url(#ir-brass)" mask="url(#ir-house)"/>
-  <rect x="3.5" y="3.5" width="93" height="93" rx="22.5" fill="none"
-        stroke="#F4D089" stroke-opacity="0.14" stroke-width="1"/>
+  <path d="M22 54 L50 25 L78 54" fill="none" stroke="url(#ir-brass)" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M30.5 52 L30.5 78.5 L69.5 78.5 L69.5 52" fill="none" stroke="url(#ir-brass)" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M44 58 L44 71 L58 64.5 Z" fill="url(#ir-brass)"/>
+  <rect x="3.5" y="3.5" width="93" height="93" rx="22.5" fill="none" stroke="#F4D089" stroke-opacity="0.14" stroke-width="1"/>
 </svg>
