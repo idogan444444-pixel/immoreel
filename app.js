@@ -16,12 +16,14 @@
     return m + ":" + (s < 10 ? "0" : "") + s;
   }
   tTot.textContent = fmt(Reel.getTotal());
+  var lastTotal = -1;
   Reel.onTime(function (t) {
     var total = t.total || 1;
     var pct = (t.playhead / total) * 100;
     scrubFill.style.width = pct.toFixed(1) + "%";
     scrub.setAttribute("aria-valuenow", Math.round(pct));
     tCur.textContent = fmt(t.playhead);
+    if (total !== lastTotal) { tTot.textContent = fmt(total); lastTotal = total; } // Gesamtlänge wächst mit Fotos
   });
 
   /* ---------- Play / Pause ---------- */
@@ -128,8 +130,8 @@
     photoInput.addEventListener("change", function () {
       var files = Array.prototype.slice.call(photoInput.files || []);
       if (!files.length) return;
-      var room = 4 - appPhotos.length;
-      if (room <= 0) { toast("Maximal 4 Fotos."); photoInput.value = ""; return; }
+      var room = 10 - appPhotos.length;
+      if (room <= 0) { toast("Maximal 10 Fotos."); photoInput.value = ""; return; }
       var toLoad = files.slice(0, room);
       Promise.all(toLoad.map(function (f) { return loadImage(f).catch(function () { return null; }); }))
         .then(function (loaded) {
@@ -194,7 +196,7 @@
         audioHint.textContent = selectMsg(track); return;
       }
       audioHint.textContent = "Track wird erzeugt …";
-      Music.render(track, Reel.getTotal()).then(function (buf) {
+      Music.render(track, 40).then(function (buf) { // 40s deckt auch das längste Video (bis 10 Fotos) ab
         trackCache[track] = buf;
         if (currentTrack !== track) return; // Nutzer hat inzwischen gewechselt
         Reel.setAudio(buf); playPreviewOnce(buf);

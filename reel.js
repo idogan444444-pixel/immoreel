@@ -104,14 +104,18 @@
   }
 
   /* ---------- Szenen ---------- */
+  var MAX_PHOTOS = 10;
   function buildScenes() {
     scenes = [];
     scenes.push({ type: "intro", dur: 2.6 });
     var rooms = state.photos.length ? state.photos : DEFAULT_ROOMS;
-    var overlays = ["price", "specs", "tagline"];
-    var n = Math.min(rooms.length, 4);
+    var hl = state.highlights.filter(Boolean);
+    var n = Math.min(rooms.length, MAX_PHOTOS);
     for (var i = 0; i < n; i++) {
-      scenes.push({ type: "photo", dur: 2.4, room: rooms[i], overlay: overlays[i % overlays.length], idx: i });
+      // Overlays abwechslungsreich: Preis, dann Specs, danach wechselnd Tagline / cleanes Foto
+      var ov = i === 0 ? "price" : i === 1 ? "specs" : (i % 2 === 0 ? "tagline" : "plain");
+      scenes.push({ type: "photo", dur: 2.4, room: rooms[i], overlay: ov, idx: i,
+        hl: hl.length ? hl[i % hl.length] : "" });
     }
     scenes.push({ type: "highlights", dur: 2.6 });
     scenes.push({ type: "outro", dur: 2.6 });
@@ -319,16 +323,14 @@
         cx += drawChip(cx, oy - 12 * S + ca.dy, chips[i]) + 8 * S;
       }
       ctx.globalAlpha = 1;
-    } else {
-      var tags = [state.highlights[0] || "Top-Lage", "Ruhige Straße"];
-      var tx = M;
-      for (var k = 0; k < tags.length; k++) {
-        var ta = appear(lt, 0.1 + k * 0.12, 0.5);
-        ctx.globalAlpha = ta.a;
-        tx += drawChip(tx, oy - 12 * S + ta.dy, tags[k]) + 8 * S;
-      }
+    } else if (scene.overlay === "tagline") {
+      var tag = scene.hl || state.location || "Top-Lage";
+      var ta = appear(lt, 0.1, 0.5);
+      ctx.globalAlpha = ta.a;
+      drawChip(M, oy - 12 * S + ta.dy, tag);
       ctx.globalAlpha = 1;
     }
+    // "plain": kein Overlay – nur das Foto wirken lassen
   }
 
   function drawHighlights(lt) {
