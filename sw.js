@@ -1,10 +1,11 @@
 /* ImmoReel Service Worker — App-Shell offline verfügbar machen */
-var CACHE = "immoreel-v1";
+var CACHE = "immoreel-v2";
 var CORE = [
   "./",
   "index.html",
   "styles.css",
   "reel.js",
+  "music.js",
   "app.js",
   "manifest.webmanifest",
   "icons/icon-192.png",

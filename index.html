@@ -148,14 +148,21 @@
         </fieldset>
 
         <fieldset>
-          <div class="legend">Musik (optional)</div>
+          <div class="legend">Musik</div>
+          <div class="pills" id="musicPills">
+            <button class="pill" type="button" data-track="" aria-pressed="true">Ohne</button>
+            <button class="pill" type="button" data-track="house" aria-pressed="false">Deep House <small>treibend</small></button>
+            <button class="pill" type="button" data-track="lofi" aria-pressed="false">Lo-Fi <small>chillig</small></button>
+            <button class="pill" type="button" data-track="cinematic" aria-pressed="false">Cinematic <small>episch</small></button>
+            <button class="pill" type="button" data-track="corporate" aria-pressed="false">Corporate <small>positiv</small></button>
+          </div>
+          <span class="upload-hint" id="audioHint">Track antippen &rarr; kurz anhören &amp; landet automatisch im Video.</span>
           <div class="upload-row">
             <label class="upload-btn" for="audioInput">
               <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M6 2l7-1v9.2A2.5 2.5 0 1 0 14 12V4L8 5v6.7A2.5 2.5 0 1 0 9 13V2z"/></svg>
-              Musik wählen
+              Eigene Musik&hellip;
             </label>
             <input id="audioInput" type="file" accept="audio/*" hidden />
-            <span class="upload-hint" id="audioHint">keine — Video wird ohne Ton exportiert</span>
           </div>
         </fieldset>
 
@@ -184,6 +191,7 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="reel.js"></script>
+  <script src="music.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

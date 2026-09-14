@@ -140,14 +140,79 @@
     });
   }
 
-  /* ---------- Musik-Upload ---------- */
-  var audioInput = $("audioInput"), audioHint = $("audioHint");
+  /* ---------- Musik (eingebaute Tracks + eigene Datei) ---------- */
+  var audioInput = $("audioInput"), audioHint = $("audioHint"), musicPills = $("musicPills");
+  var previewCtx = null, previewSrc = null, trackCache = {}, currentTrack = "";
+  var TRACK_LABELS = { house: "Deep House", lofi: "Lo-Fi", cinematic: "Cinematic", corporate: "Corporate" };
+
+  function stopPreview() {
+    if (previewSrc) {
+      try { previewSrc.stop(); } catch (e) {}
+      try { previewSrc.disconnect(); } catch (e) {}
+      previewSrc = null;
+    }
+  }
+  function playPreviewOnce(buffer) {
+    stopPreview();
+    if (!buffer) return;
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    try {
+      if (!previewCtx) previewCtx = new AC();
+      if (previewCtx.state === "suspended") previewCtx.resume();
+      var src = previewCtx.createBufferSource();
+      src.buffer = buffer; src.loop = false;
+      src.connect(previewCtx.destination);
+      src.onended = function () { if (previewSrc === src) previewSrc = null; };
+      src.start(0, 0, 7); // kurze 7-Sekunden-Hörprobe
+      previewSrc = src;
+    } catch (e) {}
+  }
+  function setMusicPressed(track) {
+    if (!musicPills) return;
+    var pills = musicPills.querySelectorAll(".pill");
+    for (var i = 0; i < pills.length; i++) {
+      pills[i].setAttribute("aria-pressed", pills[i].getAttribute("data-track") === track ? "true" : "false");
+    }
+  }
+  function selectMsg(track) {
+    return "„" + (TRACK_LABELS[track] || track) + "“ ausgewählt · Probe läuft · landet im Video.";
+  }
+
+  if (musicPills && window.Music) {
+    musicPills.addEventListener("click", function (e) {
+      var btn = e.target.closest(".pill");
+      if (!btn) return;
+      var track = btn.getAttribute("data-track") || "";
+      currentTrack = track;
+      setMusicPressed(track);
+      stopPreview();
+      if (audioInput) audioInput.value = "";
+      if (!track) { Reel.setAudio(null); audioHint.textContent = "Ohne Musik — Video wird ohne Ton exportiert."; return; }
+      if (trackCache[track]) {
+        Reel.setAudio(trackCache[track]); playPreviewOnce(trackCache[track]);
+        audioHint.textContent = selectMsg(track); return;
+      }
+      audioHint.textContent = "Track wird erzeugt …";
+      Music.render(track, Reel.getTotal()).then(function (buf) {
+        trackCache[track] = buf;
+        if (currentTrack !== track) return; // Nutzer hat inzwischen gewechselt
+        Reel.setAudio(buf); playPreviewOnce(buf);
+        audioHint.textContent = selectMsg(track);
+      }).catch(function () {
+        if (currentTrack === track) audioHint.textContent = "Track konnte nicht erzeugt werden.";
+      });
+    });
+  }
+
+  /* eigene Musik-Datei (optional) */
   if (audioInput) {
     audioInput.addEventListener("change", function () {
       var file = audioInput.files && audioInput.files[0];
       if (!file) return;
       var AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) { toast("Audio wird in diesem Browser nicht unterstützt."); return; }
+      currentTrack = ""; setMusicPressed("__none__"); stopPreview();
       audioHint.textContent = "wird geladen …";
       var reader = new FileReader();
       reader.onload = function () {
@@ -192,7 +257,7 @@
     if (lastUrl) { URL.revokeObjectURL(lastUrl); lastUrl = null; }
     progWrap.hidden = false; progFill.style.width = "0%";
     statusMsg("Video wird gerendert … (läuft in Echtzeit ab, ~" + fmt(Reel.getTotal()) + ")");
-    Reel.pause(); syncPlayIcon();
+    Reel.pause(); syncPlayIcon(); stopPreview();
 
     Reel.render(function (p) { progFill.style.width = (p * 100).toFixed(1) + "%"; })
       .then(function (res) {
